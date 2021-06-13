@@ -76,14 +76,15 @@ int main(void)
 		IndexBuffer ib(indices, 6);
 
 		glm::mat4 proj = glm::ortho(0.f, 960.f, 0.f, 540.f, -1.f, 1.f);
-		glm::vec4  vp(100.f, 100.f, 0.f, 1.f);
+		glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(-100.f, 0.f, 0.f));
+		glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(200.f, 200.f, 0.f));
 
-		glm::vec4 result = proj * vp;
+		glm::mat4 mvp = proj * view * model;
 
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
 		shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-		shader.SetUniformMat4f("u_MVP", proj);
+		shader.SetUniformMat4f("u_MVP", mvp);
 
 		Texture texture("res/textures/chernologo.png");
 		texture.Bind();

@@ -54,10 +54,10 @@ int main(void)
 	
 	{
 		float positions[] = {
-			100.f, 100.f, 0.0f, 0.0f,	// 0
-			200.f, 100.f, 1.0f, 0.0f,	// 1
-			200.f, 200.f, 1.0f, 1.0f,	// 2
-			100.f, 200.f, 0.0f, 1.0f	// 3
+			-50.f, -50.f, 0.0f, 0.0f,	// 0
+			 50.f, -50.f, 1.0f, 0.0f,	// 1
+			 50.f, 50.f, 1.0f, 1.0f,	// 2
+			-50.f, 50.f, 0.0f, 1.0f	// 3
 		};
 
 		unsigned int indices[] = {
@@ -80,7 +80,7 @@ int main(void)
 		IndexBuffer ib(indices, 6);
 
 		glm::mat4 proj = glm::ortho(0.f, 960.f, 0.f, 540.f, -1.f, 1.f);
-		glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(-100.f, 0.f, 0.f));
+		glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 0.f));
 
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
@@ -102,7 +102,8 @@ int main(void)
 		ImGui_ImplOpenGL3_Init((char*)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
 		ImGui::StyleColorsDark();
 
-		glm::vec3 translation(200.f, 200.f, 0.f);
+		glm::vec3 translationA(200.f, 200.f, 0.f);
+		glm::vec3 translationB(400.f, 200.f, 0.f);
 
 		float r = 0.0f;
 		float increment = 0.05f;
@@ -116,16 +117,24 @@ int main(void)
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+			
+			{
+				glm::mat4 model = glm::translate(glm::mat4(1.f), translationA);
+				glm::mat4 mvp = proj * view * model;
+				shader.Bind();
+				shader.SetUniformMat4f("u_MVP", mvp);
 
-			glm::mat4 model = glm::translate(glm::mat4(1.f), translation);
+				renderer.Draw(va, ib, shader);
+			}
 
-			glm::mat4 mvp = proj * view * model;
+			{
+				glm::mat4 model = glm::translate(glm::mat4(1.f), translationB);
+				glm::mat4 mvp = proj * view * model;
+				shader.Bind();
+				shader.SetUniformMat4f("u_MVP", mvp);
 
-			shader.Bind();
-			shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-			shader.SetUniformMat4f("u_MVP", mvp);
-
-			renderer.Draw(va,  ib, shader);
+				renderer.Draw(va, ib, shader);
+			}
 
 			if (r > 1.f)
 				increment = -0.05f;
@@ -137,9 +146,10 @@ int main(void)
 			{
 				ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-				ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);  
+				ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0f);  
+				ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
 
-				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", -500.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 				ImGui::End();
 			}
 
